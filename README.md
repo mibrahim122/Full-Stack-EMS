@@ -92,8 +92,8 @@ cp .env.example .env
 5. Edit `.env` file with your configuration:
 ```env
 PORT=5000
-MONGO_URI=your_mongodb_connection_string
-JWT_SECRET=your_jwt_secret_key_here
+MONGO_URI=mongodb://localhost:27017/employee_db
+JWT_SECRET=your_super_secret_jwt_key_here
 JWT_EXPIRES_IN=7d
 CLIENT_ORIGIN=http://localhost:5173
 NODE_ENV=development
@@ -173,15 +173,15 @@ After setting up, you'll need to create the first admin user directly in MongoDB
 
 ### Creating First Admin User
 
-You can use MongoDB Compass or mongosh:
+You can use MongoDB Compass or `mongosh`:
 
 ```javascript
 // Connect to your database
-use your_database_name
+use employee_db
 
 // Create admin user
 db.users.insertOne({
-  email: "your_admin_email@domain.com",
+  email: "admin@example.com",
   password: "YOUR_HASHED_PASSWORD_HERE", // Hash your password using bcrypt before inserting
   role: "ADMIN",
   createdAt: new Date(),
@@ -190,11 +190,11 @@ db.users.insertOne({
 
 // Get the user ID and create employee profile
 db.employees.insertOne({
-  userId: ObjectId("paste_generated_user_id_here"),
+  userId: ObjectId("PASTE_GENERATED_USER_ID_HERE"),
   firstName: "Admin",
   lastName: "User",
-  email: "your_admin_email@domain.com",
-  phone: "your_phone_number",
+  email: "admin@example.com",
+  phone: "1234567890",
   department: "Management",
   position: "Administrator",
   basicSalary: 0,
@@ -209,7 +209,7 @@ db.employees.insertOne({
 })
 ```
 
-Or create a seed script in `server/seed.js` for automated setup.
+*Note: Alternatively, you can create a automated seed script in `server/seed.js` for quick setup.*
 
 ## Database Models
 
