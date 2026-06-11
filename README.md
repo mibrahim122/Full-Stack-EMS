@@ -92,8 +92,8 @@ cp .env.example .env
 5. Edit `.env` file with your configuration:
 ```env
 PORT=5000
-MONGO_URI=mongodb://localhost:27017/employee-management
-JWT_SECRET=your_super_secret_jwt_key_change_this_in_production
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret_key_here
 JWT_EXPIRES_IN=7d
 CLIENT_ORIGIN=http://localhost:5173
 NODE_ENV=development
@@ -182,7 +182,7 @@ use employee-management
 // Create admin user
 db.users.insertOne({
   email: "admin@company.com",
-  password: "$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/Zs4T0vN8GqN8/Zs4T", // "admin123"
+  password: "YOUR_HASHED_PASSWORD_HERE", // Hash your password using bcrypt before inserting
   role: "ADMIN",
   createdAt: new Date(),
   updatedAt: new Date()
