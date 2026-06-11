@@ -177,11 +177,11 @@ You can use MongoDB Compass or mongosh:
 
 ```javascript
 // Connect to your database
-use employee-management
+use your_database_name
 
 // Create admin user
 db.users.insertOne({
-  email: "admin@company.com",
+  email: "your_admin_email@domain.com",
   password: "YOUR_HASHED_PASSWORD_HERE", // Hash your password using bcrypt before inserting
   role: "ADMIN",
   createdAt: new Date(),
@@ -190,16 +190,16 @@ db.users.insertOne({
 
 // Get the user ID and create employee profile
 db.employees.insertOne({
-  userId: ObjectId("paste_user_id_here"),
+  userId: ObjectId("paste_generated_user_id_here"),
   firstName: "Admin",
   lastName: "User",
-  email: "admin@company.com",
-  phone: "+1234567890",
-  department: "IT Support",
-  position: "System Administrator",
-  basicSalary: 50000,
-  allowances: 5000,
-  deductions: 1000,
+  email: "your_admin_email@domain.com",
+  phone: "your_phone_number",
+  department: "Management",
+  position: "Administrator",
+  basicSalary: 0,
+  allowances: 0,
+  deductions: 0,
   employmentStatus: "ACTIVE",
   joinDate: new Date(),
   bio: "System Administrator",
