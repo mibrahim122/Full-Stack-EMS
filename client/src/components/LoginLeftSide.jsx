@@ -1,6 +1,6 @@
 const LoginLeftSide = () => {
     return (
-        <div className="hidden md:flex w-1/2 bg-indigo-950 relative 
+        <div className="hidden md:flex w-1/2 bg-slate-950 relative 
         overflow-hidden border-r border-slate-200">
 
             <div className="absolute -top-30 -left-30 w-72 h-72 
@@ -10,13 +10,12 @@ const LoginLeftSide = () => {
             justify-center p-12 lg:p-20 w-full h-full">
 
                 <h1 className="text-4xl lg:text-5xl font-medium 
-                text-white mb-6 leading-tight tracking-tight">Employee 
-                <br /> Management System</h1>
+                text-white mb-6 leading-tight tracking-tight">Enterprise 
+                <br /> Workforce Platform</h1>
 
                 <p className="text-slate-400 text-lg max-w-md 
-                leading-relaxed">Streamline your workforce operations, 
-                track attendance, manage payroll, and empower your team 
-                securely.</p>
+                leading-relaxed">Centralize your HR operations. Seamlessly manage 
+                attendance, payroll, and team performance in one secure environment.</p>
                 
             </div>
         </div>

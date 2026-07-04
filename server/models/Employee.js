@@ -1,9 +1,5 @@
 const mongoose = require('mongoose');
 
-/**
- * Departments enum — must stay in sync with the DEPARTMENTS constant
- * in the frontend (client/src/assets/assets.jsx).
- */
 const DEPARTMENTS = [
   'Engineering',
   'Human Resources',
@@ -17,11 +13,6 @@ const DEPARTMENTS = [
   'Design',
 ];
 
-/**
- * Employee Schema — the core entity representing a staff member.
- * Links to User for authentication. Contains all personal, employment,
- * and salary information. Supports soft-delete via the `isDeleted` flag.
- */
 const employeeSchema = new mongoose.Schema(
   {
     userId: {
@@ -108,11 +99,7 @@ const employeeSchema = new mongoose.Schema(
   }
 );
 
-/**
- * Virtual field `user`: Provides a simplified view of the associated User
- * after population. Matches the shape expected by the frontend:
- * { email, role }
- */
+// Virtual field to simplify the referenced user layout inside populates
 employeeSchema.virtual('user', {
   ref: 'User',
   localField: 'userId',
@@ -120,8 +107,9 @@ employeeSchema.virtual('user', {
   justOne: true,
 });
 
-// Index for department-based filtering queries
+// Optimized database search indexes
 employeeSchema.index({ department: 1 });
 employeeSchema.index({ isDeleted: 1 });
 
-module.exports = mongoose.model('Employee', employeeSchema);
+// CRASH PROTECTION: Prevents OverwriteModelError
+module.exports = mongoose.models.Employee || mongoose.model('Employee', employeeSchema);

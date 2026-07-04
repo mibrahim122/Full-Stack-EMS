@@ -1,6 +1,7 @@
 const express = require('express');
 const { body } = require('express-validator');
-const { getPayslips, createPayslip, getPayslipById } = require('../controllers/payslipController');
+// 1. Added deletePayslip to the imported controller methods
+const { getPayslips, createPayslip, getPayslipById, deletePayslip } = require('../controllers/payslipController');
 const { protect, authorize } = require('../middleware/auth');
 const validate = require('../middleware/validate');
 
@@ -25,5 +26,8 @@ router.post(
 );
 
 router.get('/:id', protect, getPayslipById);
+
+// 2. Added the DELETE route (Only accessible by ADMINs)
+router.delete('/:id', protect, authorize('ADMIN'), deletePayslip);
 
 module.exports = router;

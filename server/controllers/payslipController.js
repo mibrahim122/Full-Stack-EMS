@@ -61,4 +61,24 @@ const getPayslipById = async (req, res, next) => {
   }
 };
 
-module.exports = { getPayslips, createPayslip, getPayslipById };
+// Add this new function to your controller
+const deletePayslip = async (req, res, next) => {
+  try {
+    const payslip = await Payslip.findById(req.params.id);
+
+    if (!payslip) {
+      throw new ApiError(404, 'Payslip not found');
+    }
+
+    await payslip.deleteOne();
+
+    res.status(200).json({ success: true, message: 'Payslip deleted successfully' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Don't forget to export it at the bottom!
+module.exports = { getPayslips, createPayslip, getPayslipById, deletePayslip };
+
+

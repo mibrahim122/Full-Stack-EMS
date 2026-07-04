@@ -4,6 +4,7 @@ import LoginLanding from "./pages/LoginLanding"
 import Layout from "./pages/Layout"
 import Dashboard from "./pages/Dashboard"
 import Employees from "./pages/Employees"
+import Trash from "./pages/Trash" // Imported your new Trash page
 import Attendance from "./pages/Attendance"
 import Leave from "./pages/Leave"
 import Payslips from "./pages/Payslips"
@@ -31,6 +32,8 @@ const App = () => {
         <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
             <Route path="/dashboard" element={<Dashboard />}/>
             <Route path="/employees" element={<ProtectedRoute adminOnly><Employees /></ProtectedRoute>}/>
+            {/* Added Trash route with adminOnly guard */}
+            <Route path="/trash" element={<ProtectedRoute adminOnly><Trash /></ProtectedRoute>}/>
             <Route path="/attendance" element={<Attendance />}/>
             <Route path="/leave" element={<Leave />}/>
             <Route path="/payslips" element={<Payslips />}/>

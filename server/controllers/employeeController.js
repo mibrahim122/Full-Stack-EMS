@@ -4,10 +4,7 @@ const ApiError = require('../utils/ApiError');
 
 /**
  * GET /api/employees
- * Returns a list of all employees. Supports optional department filtering
- * via the `department` query parameter. Populates the linked User data
- * to include email and role in the response.
- * Access: Admin only.
+ * Returns a list of all employees. Supports optional department filtering.
  */
 const getEmployees = async (req, res, next) => {
   try {
@@ -20,12 +17,15 @@ const getEmployees = async (req, res, next) => {
       .populate('userId', 'email role')
       .sort({ createdAt: -1 });
 
-    // Transform response to match frontend data shape
-    const result = employees.map((emp) => {
-      const obj = emp.toObject();
-      obj.user = obj.userId ? { email: obj.userId.email, role: obj.userId.role } : null;
-      return obj;
-    });
+    // Transform response and safely filter out any broken/orphaned database records
+    const result = employees
+      .map((emp) => {
+        if (!emp) return null;
+        const obj = emp.toObject();
+        obj.user = obj.userId ? { email: obj.userId.email, role: obj.userId.role } : null;
+        return obj;
+      })
+      .filter(emp => emp !== null);
 
     res.status(200).json({
       success: true,
@@ -39,9 +39,7 @@ const getEmployees = async (req, res, next) => {
 /**
  * POST /api/employees
  * Creates a new User account and associated Employee profile.
- * This is a transactional operation — if employee creation fails,
- * the user account is rolled back (deleted).
- * Access: Admin only.
+ * Automatically cleans up "ghost" users from previous database errors.
  */
 const createEmployee = async (req, res, next) => {
   try {
@@ -50,15 +48,26 @@ const createEmployee = async (req, res, next) => {
       basicSalary, allowances, deductions, joinDate, bio, password, role,
     } = req.body;
 
-    // Check if email already exists
-    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    const lowerCaseEmail = email.toLowerCase();
+
+    // --- GHOST USER SWEEPER ---
+    const existingUser = await User.findOne({ email: lowerCaseEmail });
     if (existingUser) {
-      throw new ApiError(400, 'An account with this email already exists');
+      const linkedEmployee = await Employee.findOne({ userId: existingUser._id });
+
+      if (!linkedEmployee) {
+        // Ghost account found! It has no profile. Wipe it out automatically.
+        await User.findByIdAndDelete(existingUser._id);
+      } else if (linkedEmployee.isDeleted) {
+        throw new ApiError(400, 'This email is currently in the Trash Bin. Please permanently delete it or restore it first.');
+      } else {
+        throw new ApiError(400, 'An active account with this email already exists.');
+      }
     }
 
     // Create user account
     const user = await User.create({
-      email: email.toLowerCase(),
+      email: lowerCaseEmail,
       password,
       role: role || 'EMPLOYEE',
     });
@@ -69,7 +78,7 @@ const createEmployee = async (req, res, next) => {
         userId: user._id,
         firstName,
         lastName,
-        email: email.toLowerCase(),
+        email: lowerCaseEmail,
         phone,
         department,
         position,
@@ -105,8 +114,6 @@ const createEmployee = async (req, res, next) => {
 /**
  * PUT /api/employees/:id
  * Updates an existing employee's profile and optionally their user account.
- * If a new password is provided, the associated user's password is also updated.
- * Access: Admin only.
  */
 const updateEmployee = async (req, res, next) => {
   try {
@@ -166,9 +173,7 @@ const updateEmployee = async (req, res, next) => {
 
 /**
  * DELETE /api/employees/:id
- * Soft-deletes an employee by setting isDeleted to true.
- * The employee record is preserved for historical data integrity.
- * Access: Admin only.
+ * Soft-deletes an employee and their linked User account.
  */
 const deleteEmployee = async (req, res, next) => {
   try {
@@ -179,13 +184,81 @@ const deleteEmployee = async (req, res, next) => {
       throw new ApiError(404, 'Employee not found');
     }
 
+    // Soft delete the employee profile
     employee.isDeleted = true;
     employee.employmentStatus = 'INACTIVE';
     await employee.save();
 
+    // Soft delete the linked User login account
+    if (employee.userId) {
+      await User.findByIdAndUpdate(employee.userId, { isDeleted: true });
+    }
+
     res.status(200).json({
       success: true,
-      message: 'Employee deleted successfully',
+      message: 'Employee moved to trash successfully',
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * PUT /api/employees/:id/restore
+ * Restores a soft-deleted employee and their user account.
+ */
+const restoreEmployee = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const employee = await Employee.findById(id);
+    if (!employee) {
+      throw new ApiError(404, 'Employee not found');
+    }
+
+    // Restore the employee profile
+    employee.isDeleted = false;
+    employee.employmentStatus = 'ACTIVE';
+    await employee.save();
+
+    // Restore the linked User login account
+    if (employee.userId) {
+      await User.findByIdAndUpdate(employee.userId, { isDeleted: false });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Employee restored successfully',
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * DELETE /api/employees/:id/permanent
+ * Hard-deletes an employee out of the database permanently and cleans up their linked User account.
+ */
+const permanentDeleteEmployee = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const employee = await Employee.findById(id);
+    if (!employee) {
+      throw new ApiError(404, 'Employee not found');
+    }
+
+    // Delete the associated user account profile first
+    if (employee.userId) {
+      await User.findByIdAndDelete(employee.userId);
+    }
+
+    // Delete the employee record itself
+    await Employee.findByIdAndDelete(id);
+
+    res.status(200).json({
+      success: true,
+      message: 'Employee record permanently erased',
     });
   } catch (error) {
     next(error);
@@ -195,7 +268,6 @@ const deleteEmployee = async (req, res, next) => {
 /**
  * GET /api/employees/profile
  * Returns the employee profile of the currently authenticated user.
- * Access: Any authenticated user.
  */
 const getProfile = async (req, res, next) => {
   try {
@@ -221,8 +293,6 @@ const getProfile = async (req, res, next) => {
 /**
  * PUT /api/employees/profile
  * Updates the bio of the currently authenticated user's employee profile.
- * Only the bio field is editable by the employee themselves.
- * Access: Any authenticated user.
  */
 const updateProfile = async (req, res, next) => {
   try {
@@ -258,6 +328,8 @@ module.exports = {
   createEmployee,
   updateEmployee,
   deleteEmployee,
+  restoreEmployee,
+  permanentDeleteEmployee,
   getProfile,
   updateProfile,
 };

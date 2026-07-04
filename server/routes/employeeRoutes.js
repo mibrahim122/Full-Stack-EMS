@@ -5,6 +5,8 @@ const {
   createEmployee,
   updateEmployee,
   deleteEmployee,
+  restoreEmployee,           // Imported restore controller
+  permanentDeleteEmployee,  // Imported permanent delete controller
   getProfile,
   updateProfile,
 } = require('../controllers/employeeController');
@@ -44,6 +46,12 @@ router.put(
   ],
   updateProfile
 );
+
+// RESTORE ENDPOINT: PUT /api/employees/:id/restore
+router.put('/:id/restore', protect, authorize('ADMIN'), restoreEmployee);
+
+// PERMANENT DELETE ENDPOINT: DELETE /api/employees/:id/permanent
+router.delete('/:id/permanent', protect, authorize('ADMIN'), permanentDeleteEmployee);
 
 router.put(
   '/:id',

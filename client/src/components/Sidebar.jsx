@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import { 
     MenuIcon, UserIcon, XIcon, LayoutGridIcon, 
     CalendarIcon, FileTextIcon, DollarSignIcon, 
-    SettingsIcon, ChevronRightIcon, LogOutIcon 
+    SettingsIcon, ChevronRightIcon, LogOutIcon, Trash2Icon 
 } from 'lucide-react'
 
 const Sidebar = () => {
@@ -29,7 +29,8 @@ const Sidebar = () => {
     const navItems = [
         {name: "Dashboard", href: "/dashboard", icon: LayoutGridIcon},
         ...(role === "ADMIN" ? [
-            {name: "Employees", href: "/employees", icon: UserIcon}
+            {name: "Employees", href: "/employees", icon: UserIcon},
+            {name: "Trash Bin", href: "/trash", icon: Trash2Icon} // Added Trash link for Admin role
         ] : []),
         {name: "Attendance", href: "/attendance", icon: CalendarIcon},
         {name: "Leave", href: "/leave", icon: FileTextIcon},
@@ -44,7 +45,7 @@ const Sidebar = () => {
     const sidebarContent = (
         <>
             {/* Brand header */}
-            <div className='px-5 pt-6 pb-5 border-b border-white/6'>
+            <div className='px-5 pt-6 pb-5 border-b border-slate-800/60'>
                 <div className='flex items-center justify-between'>
                     <div className='flex items-center gap-3'>
                         <UserIcon className='text-white size-7'/>
@@ -62,9 +63,9 @@ const Sidebar = () => {
 
             {/* User profile card */}
             {userName && (
-                <div className='mx-3 mt-4 mb-1 p-3 rounded-lg bg-white/3 border border-white/4'>
+                <div className='mx-3 mt-4 mb-1 p-3 rounded-lg bg-slate-900/60 border border-slate-800/80'>
                     <div className='flex items-center gap-3'>
-                        <div className='w-9 h-9 rounded-lg bg-slate-800 flex items-center justify-center ring-1 ring-white/10 shrink-0'>
+                        <div className='w-9 h-9 rounded-lg bg-slate-950 flex items-center justify-center ring-1 ring-slate-800 shrink-0'>
                             <span className='text-slate-400 text-xs font-semibold'>
                                 {userName.charAt(0).toUpperCase()}
                             </span>
@@ -98,7 +99,7 @@ const Sidebar = () => {
             </div>
 
             {/* Logout */}
-            <div className="p-3 border-t border-white/6">
+            <div className="p-3 border-t border-slate-800/60">
                 <button onClick={handleLogout} className='flex items-center gap-3 w-full px-3 py-2.5 rounded-md text-[13px] font-medium text-slate-400 hover:text-rose-400 hover:bg-rose-500/8 transition-all duration-150'>
                     <LogOutIcon className="w-[17px] h-[17px]"/>
                     <span>Log out</span>
@@ -110,7 +111,7 @@ const Sidebar = () => {
     return (
         <>
             {/* Mobile hamburger button */}
-            <button onClick={()=>setMobileOpen(true)} className='lg:hidden fixed top-4 left-4 z-50 p-2 bg-slate-900 text-white rounded-lg shadow-lg border border-white/10'>
+            <button onClick={()=>setMobileOpen(true)} className='lg:hidden fixed top-4 left-4 z-50 p-2 bg-slate-950 text-white rounded-lg shadow-lg border border-slate-800'>
                 <MenuIcon size={20}/>
             </button>
 
@@ -118,12 +119,12 @@ const Sidebar = () => {
             {mobileOpen && <div className='lg:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40' onClick={()=>setMobileOpen(false)}/>}
 
             {/* Sidebar - desktop */}
-            <aside className='hidden lg:flex flex-col h-full w-65 bg-linear-to-b from-slate-900 via-slate-900 to-slate-950 text-white shrink-0 border-r border-white/4'>
+            <aside className='hidden lg:flex flex-col h-full w-65 bg-slate-950 text-white shrink-0 border-r border-slate-900'>
                 {sidebarContent}
             </aside>
 
             {/* Sidebar - mobile */}
-            <aside className={`lg:hidden fixed inset-y-0 left-0 w-72 bg-linear-to-b from-slate-900 via-slate-900 to-slate-950 text-white z-50 flex flex-col transform transition-transform duration-300 ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}>
+            <aside className={`lg:hidden fixed inset-y-0 left-0 w-72 bg-slate-950 text-white z-50 flex flex-col transform transition-transform duration-300 ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}>
                 {sidebarContent}
             </aside>
         </>

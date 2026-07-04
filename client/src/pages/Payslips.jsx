@@ -42,6 +42,7 @@ const Payslips = () => {
 
   if(loading) return <Loading />
 
+// Inside Payslips.jsx return statement
   return (
     <div className="animate-fade-in">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
@@ -51,7 +52,9 @@ const Payslips = () => {
         </div>
         {isAdmin && <GeneratePayslipForm employees={employees} onSuccess={fetchPayslips} />}
       </div>
-      <PayslipList payslips={payslips} isAdmin={isAdmin} />
+      
+      {/* ADD the onSuccess prop here so the list updates after a deletion */}
+      <PayslipList payslips={payslips} isAdmin={isAdmin} onSuccess={fetchPayslips} />
     </div>
   )
 }
